@@ -121,8 +121,8 @@ scripted scan with and without the sensor, none of which needs a model or costs 
 ## Known limits (v0)
 
 - Four of eighteen patterns have scenarios.
-- Claude Code and Gemini CLI have recorded measurements. Codex CLI is wired and verified,
-  but has no recorded result yet, and an open model through Ollama has no target. Run
+- Claude Code, Gemini CLI and Codex CLI have recorded measurements. An open model through
+  Ollama has no target yet. Run
   `python3 -m guardian_scanner targets` to see what your own machine can do.
 - The YAML reader covers only the subset `schema.yaml` uses and refuses anything else. That
   is deliberate, but it means a pattern written in wider YAML is rejected rather than read.
