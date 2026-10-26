@@ -468,6 +468,46 @@ def test_the_preview_column_fits_a_bundle_digest():
           f"{header!r} vs {rows[0]!r}")
 
 
+def test_the_default_paths_include_the_drill_log():
+    """The drill is the first thing a new member runs, and it tells them to report.
+
+    Its closing lines say to run `report --preview`. With only the proxy's log in the
+    defaults, that instruction printed "Entries: 0" on a machine that had just caught
+    three attacks, which reads as the sensor having found nothing.
+
+    The drill marks every record it writes, so these arrive as source "drill" and the
+    summary says so. That is what makes reading the log by default safe rather than an
+    overclaim.
+    """
+    check("the drill log is a default", ".guardian/drill/evidence.jsonl" in hub.DEFAULT_EVIDENCE,
+          str(hub.DEFAULT_EVIDENCE))
+    check("the sensor log is still a default", ".guardian/evidence.jsonl" in hub.DEFAULT_EVIDENCE,
+          str(hub.DEFAULT_EVIDENCE))
+
+    folder = tempfile.mkdtemp()
+    try:
+        drill_dir = os.path.join(folder, ".guardian", "drill")
+        os.makedirs(drill_dir)
+        record = {"time": "2026-10-22T13:04:11+00:00", "patterns": ["GP-0003"],
+                  "action": "blocked", "drill": True, "detail": {}}
+        with open(os.path.join(drill_dir, "evidence.jsonl"), "w") as f:
+            f.write(json.dumps(record) + "\n")
+        here = os.getcwd()
+        os.chdir(folder)
+        try:
+            # The proxy log does not exist here, which is the state of a machine that has
+            # run the drill and nothing else. A missing path must be skipped, not raised.
+            records = hub.read_evidence(list(hub.DEFAULT_EVIDENCE))
+        finally:
+            os.chdir(here)
+        check("a drill-only machine has something to report", len(records) == 1, str(records))
+        entries = hub.build_sightings(records, "a-lab", "b34d9a7a88daa")["sightings"]
+        check("it travels marked as a drill",
+              [e["source"] for e in entries] == ["drill"], str(entries))
+    finally:
+        shutil.rmtree(folder, ignore_errors=True)
+
+
 def main():
     for fn in [v for k, v in sorted(globals().items()) if k.startswith("test_")]:
         fn()

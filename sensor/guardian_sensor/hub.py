@@ -52,7 +52,13 @@ HOUR_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}$")
 RULES_VERSION_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,31}$")
 SENSOR_VERSION_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 ._-]{0,39}$")
 
-DEFAULT_EVIDENCE = (".guardian/evidence.jsonl",)
+# The proxy's log, and the drill's. The drill is the first thing a new member runs, and
+# its own closing lines tell them to report what it caught, so leaving its log out of the
+# default made that instruction produce "Entries: 0" on a machine that had just caught
+# three attacks. Reading it here is safe because the drill marks every record it writes:
+# they arrive as source "drill", and the summary says so in plain words. A path that does
+# not exist is skipped, so a member who has never run the drill sees no difference.
+DEFAULT_EVIDENCE = (".guardian/evidence.jsonl", ".guardian/drill/evidence.jsonl")
 
 
 class HubError(Exception):

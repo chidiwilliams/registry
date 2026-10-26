@@ -32,7 +32,7 @@ def report(argv, out=sys.stdout):
     ap.add_argument("--org", default=os.environ.get("GUARDIAN_ORG"),
                     help="your pseudonymous member id, never a company name")
     ap.add_argument("--evidence", action="append", default=None,
-                    help="evidence log to read; repeatable. Defaults to .guardian/evidence.jsonl")
+                    help="evidence log to read; repeatable. Defaults to the sensor log and the drill log")
     ap.add_argument("--rules-version", default=None)
     ap.add_argument("--updates", default=DEFAULT_UPDATES)
     a = ap.parse_args(argv)
